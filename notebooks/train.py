@@ -18,31 +18,47 @@ def _():
     from tqdm.notebook import tqdm
     from sklearn.preprocessing import MultiLabelBinarizer
     from sklearn.feature_extraction.text import TfidfVectorizer
-    return (datetime,)
+    from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
+    return (
+        MultiLabelBinarizer,
+        MultilabelStratifiedKFold,
+        TfidfVectorizer,
+        datetime,
+        pickle,
+        pl,
+        xgb,
+    )
 
 
-app._unparsable_cell(
-    r"""
+@app.cell
+def _(
+    MultiLabelBinarizer,
+    MultilabelStratifiedKFold,
+    TfidfVectorizer,
+    pickle,
+    pl,
+    xgb,
+):
     def load_dataset(filename: str) -> pl.DataFrame:
         return pl.read_parquet(filename)
 
 
     def load_embedding_model(filename: str) -> TfidfVectorizer:
-        with open(filename, \"rb\") as fh:
+        with open(filename, "rb") as fh:
             return pickle.load(fh)
 
 
     def store_artifact_as_pickle(artifact, filename) -> None:
-        with open(filename, \"wb\") as _fh:
+        with open(filename, "wb") as _fh:
             pickle.dump(artifact, _fh)
 
 
     def prepare_dataset_train_test_splits(dataset: pl.DataFrame) -> tuple[
-        list[str], list[str], list[list[int]], list[list[int]
+        list[str], list[str], list[list[int]], list[list[int]]
     ]:
-        sample_identifiers = dataset[\"alert_id\"].to_list()
-        X = dataset[\"text\"].to_list()
-        Y = dataset[\"labels\"].to_list()
+        sample_identifiers = dataset["alert_id"].to_list()
+        X = dataset["text"].to_list()
+        Y = dataset["labels"].to_list()
         mlb = MultiLabelBinarizer()
         Y_binarized = mlb.fit_transform(Y)
 
@@ -60,7 +76,7 @@ app._unparsable_cell(
         return X_train, X_test, Y_train, Y_test
 
 
-    def train_classifier(X_train: list[str], Y_train: list[list[int]], embedder: TfidVectorizer) -> xgb.XGBClassifier:
+    def train_classifier(X_train: list[str], Y_train: list[list[int]], embedder: TfidfVectorizer) -> xgb.XGBClassifier:
         mlb = MultiLabelBinarizer()
         Y_train_binarized = mlb.fit_transform(Y_train)
         X_train_embeddings = embedder.transform(X_train)
@@ -69,9 +85,13 @@ app._unparsable_cell(
         clf_head.fit(X_train_embeddings, Y_train_binarized)
 
         return clf_head
-    """,
-    name="_"
-)
+    return (
+        load_dataset,
+        load_embedding_model,
+        prepare_dataset_train_test_splits,
+        store_artifact_as_pickle,
+        train_classifier,
+    )
 
 
 @app.cell
