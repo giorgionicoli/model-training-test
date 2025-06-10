@@ -1,0 +1,1 @@
+To set up the environment, run the `setup.sh` script.
