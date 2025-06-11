@@ -26,7 +26,6 @@ def _():
         MultilabelStratifiedKFold,
         TfidfVectorizer,
         cross_val_score,
-        datetime,
         np,
         optuna,
         pickle,
@@ -165,20 +164,26 @@ def _(
             output_filename,
         )
         print("Model stored successfully at:", output_filename)
-    return (main,)
+    return
 
 
-@app.cell
-def _(datetime, main, time_str):
-    _time_str = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+app._unparsable_cell(
+    r"""
+    _dataset_filename = \"<dataset-filename-placeholder>\"
+    _embedding_model_filename = \"<embedding-model-filename-placeholder>\"
+    _output_model_filename = \"<output-model-filename-placeholder>\"
+
+    _time_str = datetime.datetime.now().strftime(\"%Y%m%d-%H%M%S\")
 
 
     main(
-        dataset_filename="data/<dataset-filename-placeholder>.parquet",
-        embedding_model_filename="models/<embedding-model-filename-placeholder>.pkl",
-        output_filename=f"models/{time_str}_<output-model-filename-placeholder>.pkl",
+        dataset_filename=f\"data/{_dataset_filename}.parquet\",
+        embedding_model_filename=f\"models/{}.pkl\",
+        output_filename=f\"models/{_time_str}_{_output_model_filename}.pkl\",
     )
-    return
+    """,
+    name="_"
+)
 
 
 if __name__ == "__main__":
